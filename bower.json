@@ -1,0 +1,17 @@
+{
+  "name": "ng-extra",
+  "version": "0.0.1",
+  "homepage": "https://github.com/sorcerers/ng-extra",
+  "authors": [
+    "bolasblack <bolasblack@gmail.com>"
+  ],
+  "main": "src/ng-extra.coffee",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
