@@ -83,28 +83,37 @@ angular.module('ng-extra', [])
 #     # some code
 #     defer.promise
 #
-# TODO: support form submit
-#
-.directive('busybtn', -> # [[[
+.directive('busybtn', [ # [[[
+  '$q'
+
+($q) ->
   link: (scope, element, attrs) ->
-    originalText = undefined
-
+    originalText = element.text()
     isBusy = false
-
-    element.on attrs.busybtn, (event) ->
+    events = attrs.busybtn.split ' '
+    handler = (event) ->
+      event.preventDefault()
       return if isBusy
       isBusy = true
       originalText = element.text()
-      promise = scope.$eval attrs.busybtnHandler
-      if angular.isDefined(promise) and promise.hasOwnProperty('then')
-        promise.finally -> isBusy = false
+      $q.when(scope.$eval attrs.busybtnHandler).finally ->
+        isBusy = false
+
+    if 'submit' in events
+      events = (event for event in events when event isnt 'submit')
+      $form = element.closest 'form'
+      if $form.length
+        $form.on 'submit', handler
+        scope.$on '$destroy', -> $form.off 'submit', handler
+
+    element.on events.join(' '), handler
 
     scope.$watch (-> isBusy), (isBusy) ->
       element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
       element["#{if isBusy then 'a' else 'removeA'}ttr"] 'disabled', 'disabled'
       if angular.isDefined attrs.busybtnText
         element.text if isBusy then attrs.busybtnText else originalText
-) # ]]]
+]) # ]]]
 
 
 # Wrap `window.alert`, `window.prompt`, `window.confirm`
