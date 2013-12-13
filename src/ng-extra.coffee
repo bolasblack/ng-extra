@@ -27,11 +27,25 @@ angular.module('ng-extra', [])
   ])
 ]) # ]]]
 
+
+# Resource = $resource(
+#   '/path/to/resource',
+#   {id: '@defaultId'},
+#   {
+#     action1: {
+#       normalize: true
+#       retainprops: ['id', 'name']
+#     }
+#   }
+# )
+#
+# resource = new Resource
+# resource.$update(params, data)
+#
 .config([ # Resource action normalize [[[
   '$provide'
 
 ($provide) ->
-
   $provide.decorator('$resource', [
     '$delegate'
 
@@ -40,6 +54,7 @@ angular.module('ng-extra', [])
       Resource = $delegate url, paramDefaults, actions
       angular.forEach actions, (options, method) ->
         return unless options.normalize
+        retainprops = options.retainprops ? ['id']
 
         Resource::["$#{method}"] = (params, data, success, error) ->
           if angular.isFunction params
@@ -53,17 +68,19 @@ angular.module('ng-extra', [])
             data = {}
 
           data = angular.copy data
-          data.id = @id
-          @$resolved = false
-          result = Resource[method] params, data, (resp, headers) =>
+          angular.forEach retainprops, (property) =>
+            data[property] = this[property]
+
+          successHandler = (resp, headers) =>
+            @$resolved = true
             angular.copy angular.clean(resp), this
             success? this, headers
-          , error
-
-          result.$promise = result.$promise.finally =>
+          errorHandler = (resp) ->
             @$resolved = true
-            return
+            error? resp
 
+          @$resolved = false
+          result = Resource[method] params, data, successHandler, errorHandler
           result.$promise or result
 
       Resource
