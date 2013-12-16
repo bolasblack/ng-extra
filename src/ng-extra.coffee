@@ -154,7 +154,7 @@ angular.module('ng-extra', [])
       deferMethod = if result? then 'resolve' else 'reject'
       defer[deferMethod] result
 
-  angular.forEach methods, (name, handler) ->
+  angular.forEach methods, (handler, name) ->
     $dialog[name] = (options) ->
       defer = $q.defer()
       result = $window[name] options.message, options.defaultText
