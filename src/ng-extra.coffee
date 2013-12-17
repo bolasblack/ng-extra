@@ -1,5 +1,5 @@
 
-angular.module('ng-extra', [])
+angular.module('ng-extra', ['ngResource'])
 
 .run(-> # angular.clean [[[
   angular.clean = (obj) ->
