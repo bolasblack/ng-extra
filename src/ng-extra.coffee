@@ -67,7 +67,7 @@ angular.module('ng-extra', ['ngResource'])
             success = data
             data = {}
 
-          data = angular.copy data
+          data = angular.copy(data) or {}
           angular.forEach retainprops, (property) =>
             data[property] = this[property]
 
