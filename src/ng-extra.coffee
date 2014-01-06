@@ -105,6 +105,7 @@ angular.module('ng-extra', ['ngResource'])
 
 ($q) ->
   link: (scope, element, attrs) ->
+    EXPRESSION_RE = /^{{(.+)}}$/
     originalText = element.text()
     isBusy = false
     events = attrs.busybtn.split ' '
@@ -122,6 +123,11 @@ angular.module('ng-extra', ['ngResource'])
       if $form.length
         $form.on 'submit', handler
         scope.$on '$destroy', -> $form.off 'submit', handler
+
+    if EXPRESSION_RE.test originalText
+      try
+        originalText = originalText.replace EXPRESSION_RE, ($, $1) ->
+          scope.$eval $1
 
     element.on events.join(' '), handler
 
