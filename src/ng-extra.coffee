@@ -153,6 +153,46 @@ angular.module('ng-extra', ['ngResource'])
         element[changeMethod] originalText
 ]) # ]]]
 
+# html:
+#   <input data-ng-model="somevar"
+#          data-busybox="click dblclick"
+#          data-busybox-text="submiting..."
+#          data-busybox-handler="onclick($event)"
+#          value="submit" />
+#
+# code:
+#   $scope.onclick = ->
+#     defer = $q.defer()
+#     # some code
+#     defer.promise
+#
+.directive('busybox', [ # [[[
+  '$q'
+  '$parse'
+
+($q, $parse) ->
+  terminal: true
+  require: '?ngModel'
+  link: (scope, element, attrs, ngModel) ->
+    isBusy = false
+
+    handler = (event, params...) ->
+      return if isBusy
+      isBusy = true
+      fn = $parse attrs.busyboxHandler
+      $q.when(fn scope, $event: event, $params: params).finally ->
+        isBusy = false
+
+    element.on attrs.busybox, handler
+
+    scope.$watch (-> isBusy), ->
+      element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
+      element["#{if isBusy then 'a' else 'removeA'}ttr"] 'disabled', 'disabled'
+      if isBusy and angular.isDefined attrs.busyboxText
+        element.val attrs.busyboxText
+      else if ngModel
+        element.val ngModel.$modelValue
+]) # ]]]
 
 # Wrap `window.alert`, `window.prompt`, `window.confirm`
 #
