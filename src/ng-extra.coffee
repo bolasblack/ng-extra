@@ -102,40 +102,55 @@ angular.module('ng-extra', ['ngResource'])
 #
 .directive('busybtn', [ # [[[
   '$q'
+  '$parse'
 
-($q) ->
+($q, $parse) ->
+  EXPRESSION_RE = /^{{(.+)}}$/
+
+  terminal: true
   link: (scope, element, attrs) ->
-    EXPRESSION_RE = /^{{(.+)}}$/
-    originalText = element.text()
     isBusy = false
-    events = attrs.busybtn.split ' '
-    handler = (event) ->
+    changeMethod = if element.is('input') then 'val' else 'text'
+    originalText = element[changeMethod]()
+
+    handler = (event, params...) ->
       event.preventDefault()
       return if isBusy
       isBusy = true
-      originalText = element.text()
-      $q.when(scope.$eval attrs.busybtnHandler).finally ->
+      originalText = element[changeMethod]()
+      fn = $parse attrs.busybtnHandler
+      $q.when(fn scope, $event: event, $params: params).finally ->
         isBusy = false
 
-    if 'submit' in events
-      events = (event for event in events when event isnt 'submit')
+    bindEvents = (eventNames) ->
+      submitEvents = []
+      normalEvents = []
+
+      events = eventNames.split ' '
+      for event in events
+        (if /^submit\./.test(event) then submitEvents else normalEvents).push event
+      element.on normalEvents.join(' '), handler
+
       $form = element.closest 'form'
-      if $form.length
-        $form.on 'submit', handler
-        scope.$on '$destroy', -> $form.off 'submit', handler
+      return unless $form.length
+      $form.on submitEvents.join(' '), handler
+      scope.$on '$destroy', ->
+        $form.off submitEvents.join(' '), handler
 
     if EXPRESSION_RE.test originalText
       try
         originalText = originalText.replace EXPRESSION_RE, ($, $1) ->
           scope.$eval $1
 
-    element.on events.join(' '), handler
+    bindEvents attrs.busybtn
 
-    scope.$watch (-> isBusy), (isBusy) ->
+    scope.$watch (-> isBusy), ->
       element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
       element["#{if isBusy then 'a' else 'removeA'}ttr"] 'disabled', 'disabled'
-      if angular.isDefined attrs.busybtnText
-        element.text if isBusy then attrs.busybtnText else originalText
+      if isBusy and angular.isDefined attrs.busybtnText
+        element[changeMethod] attrs.busybtnText
+      else if originalText?
+        element[changeMethod] originalText
 ]) # ]]]
 
 
