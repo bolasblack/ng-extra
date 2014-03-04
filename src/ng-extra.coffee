@@ -128,7 +128,7 @@ angular.module('ng-extra', ['ngResource'])
 
       events = eventNames.split ' '
       for event in events
-        (if /^submit\./.test(event) then submitEvents else normalEvents).push event
+        (if /^submit(\.|$)?/.test(event) then submitEvents else normalEvents).push event
       element.on normalEvents.join(' '), handler
 
       $form = element.closest 'form'
