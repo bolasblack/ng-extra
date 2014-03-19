@@ -110,11 +110,22 @@ angular.module('ng-extra', ['ngResource'])
 #           data-busybtn-handler="onclick($event)"
 #   >submit</button>
 #
+#   <!-- promise variable must end with 'Promise' -->
+#   <button data-busybtn="clickPromise"
+#           data-busybtn-text="submiting..."
+#           data-busybtn-handler="onclick2($event)"
+#   >submit</button>
+#
 # code:
 #   $scope.onclick = ->
 #     defer = $q.defer()
 #     # some code
-#     defer.promise
+#     defer.promise # return a promise
+#
+#   $scope.onclick2 = ->
+#     defer = $q.defer()
+#     $scope.clickPromise = defer.promise # assign a promise
+#     # some code
 #
 .directive('busybtn', [ # [[[
   '$q'
@@ -153,12 +164,20 @@ angular.module('ng-extra', ['ngResource'])
       scope.$on '$destroy', ->
         $form.off submitEvents.join(' '), handler
 
+    bindPromise = (promiseName) ->
+      scope.$watch promiseName, (promise) ->
+        return unless promise and angular.isFunction promise.then
+        isBusy = true
+        promise.finally ->
+          isBusy = false
+
     if EXPRESSION_RE.test originalText
       try
         originalText = originalText.replace EXPRESSION_RE, ($, $1) ->
           scope.$eval $1
 
-    bindEvents attrs.busybtn
+    bindFn = if /Promise$/.test(attrs.busybtn) then bindPromise else bindEvents
+    bindFn attrs.busybtn
 
     scope.$watch (-> isBusy), ->
       element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
@@ -180,7 +199,7 @@ angular.module('ng-extra', ['ngResource'])
 #   $scope.onclick = ->
 #     defer = $q.defer()
 #     # some code
-#     defer.promise
+#     defer.promise # return a promise
 #
 .directive('busybox', [ # [[[
   '$q'
