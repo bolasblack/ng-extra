@@ -113,7 +113,6 @@ angular.module('ng-extra', ['ngResource'])
 #   <!-- promise variable must end with 'Promise' -->
 #   <button data-busybtn="clickPromise"
 #           data-busybtn-text="submiting..."
-#           data-busybtn-handler="onclick2($event)"
 #   >submit</button>
 #
 # code:
