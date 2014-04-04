@@ -131,9 +131,6 @@ angular.module('ng-extra', ['ngResource'])
   '$parse'
 
 ($q, $parse) ->
-  EXPRESSION_RE = /^{{(.+)}}$/
-
-  terminal: true
   link: (scope, element, attrs) ->
     isBusy = false
     changeMethod = if element.is('input') then 'val' else 'text'
@@ -143,7 +140,6 @@ angular.module('ng-extra', ['ngResource'])
       event.preventDefault()
       return if isBusy
       isBusy = true
-      originalText = element[changeMethod]()
       fn = $parse attrs.busybtnHandler
       $q.when(fn scope, $event: event, $params: params).finally ->
         isBusy = false
@@ -170,10 +166,10 @@ angular.module('ng-extra', ['ngResource'])
         promise.finally ->
           isBusy = false
 
-    if EXPRESSION_RE.test originalText
-      try
-        originalText = originalText.replace EXPRESSION_RE, ($, $1) ->
-          scope.$eval $1
+    # Maybe your button content is dynamic?
+    scope.$watch (-> element[changeMethod]()), (newVal) ->
+      return if newVal is attrs.busybtnText
+      originalText = newVal
 
     bindFn = if /Promise$/.test(attrs.busybtn) then bindPromise else bindEvents
     bindFn attrs.busybtn
