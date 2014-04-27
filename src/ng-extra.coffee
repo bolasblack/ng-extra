@@ -22,6 +22,14 @@ angular.module('ng-extra', ['ngResource'])
       listener?.apply? this, arguments...
 ]) # ]]]
 
+.run([ # [[[ $scope.$safeDigest
+  '$rootScope'
+
+($rootScope) ->
+  $rootScope.$safeDigest = ->
+    @$digest() unless @$$phase
+]) # ]]]
+
 .config([ # Resource.wrapStaticMethod [[[
   '$provide'
 
