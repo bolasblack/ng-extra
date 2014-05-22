@@ -195,24 +195,31 @@ angular.module('ng-extra', ['ngResource'])
 ]) # ]]]
 
 # html:
-#   <input data-ng-model="somevar"
-#          data-busybox="click dblclick"
+#   <input type="text"
+#          data-ng-model="somevar"
+#          data-busybox="keypress"
 #          data-busybox-text="submiting..."
-#          data-busybox-handler="onclick($event)"
+#          data-busybox-handler="oninput($event)"
 #          value="submit" />
 #
 #   <!-- promise variable must end with 'Promise' -->
 #   <input data-ng-model="somevar"
-#          data-busybox="clickPromise"
+#          data-ng-keypress="oninput2($event)"
+#          data-busybox="inputPromise"
 #          data-busybox-text="submiting..."
 #          value="submit" />
 #   >
 #
 # code:
-#   $scope.onclick = ->
+#   $scope.oninput = ($event) ->
 #     defer = $q.defer()
 #     # some code
 #     defer.promise # return a promise
+#
+#   $scope.oninput2 = ($event) ->
+#     defer = $q.defer()
+#     $scope.inputPromise = defer.promise # assign a promise
+#     # some code
 #
 .directive('busybox', [ # [[[
   '$q'
