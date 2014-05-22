@@ -1,4 +1,7 @@
 
+isPromise = (obj) ->
+  obj? and angular.isFunction obj.then
+
 angular.module('ng-extra', ['ngResource'])
 
 .run(-> # angular.clean [[[
@@ -169,7 +172,7 @@ angular.module('ng-extra', ['ngResource'])
 
     bindPromise = (promiseName) ->
       scope.$watch promiseName, (promise) ->
-        return unless promise and angular.isFunction promise.then
+        return unless isPromise promise
         isBusy = true
         promise.finally ->
           isBusy = false
@@ -198,6 +201,13 @@ angular.module('ng-extra', ['ngResource'])
 #          data-busybox-handler="onclick($event)"
 #          value="submit" />
 #
+#   <!-- promise variable must end with 'Promise' -->
+#   <input data-ng-model="somevar"
+#          data-busybox="clickPromise"
+#          data-busybox-text="submiting..."
+#          value="submit" />
+#   >
+#
 # code:
 #   $scope.onclick = ->
 #     defer = $q.defer()
@@ -214,14 +224,23 @@ angular.module('ng-extra', ['ngResource'])
   link: (scope, element, attrs, ngModel) ->
     isBusy = false
 
-    handler = (event, params...) ->
-      return if isBusy
-      isBusy = true
-      fn = $parse attrs.busyboxHandler
-      $q.when(fn scope, $event: event, $params: params).finally ->
-        isBusy = false
+    bindPromise = (promiseName) ->
+      scope.$watch promiseName, (promise) ->
+        return unless isPromise promise
+        isBusy = true
+        promise.finally ->
+          isBusy = false
 
-    element.on attrs.busybox, handler
+    bindEvents = (eventNames) ->
+      element.on eventNames, (event, params...) ->
+        return if isBusy
+        isBusy = true
+        fn = $parse attrs.busyboxHandler
+        $q.when(fn scope, $event: event, $params: params).finally ->
+          isBusy = false
+
+    bindFn = if /Promise$/.test(attrs.busybox) then bindPromise else bindEvents
+    bindFn attrs.busybox
 
     scope.$watch (-> isBusy), ->
       element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
