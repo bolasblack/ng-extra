@@ -282,7 +282,7 @@ angular.module('ng-extra', ['ngResource'])
   angular.forEach methods, (handler, name) ->
     $dialog[name] = (options) ->
       defer = $q.defer()
-      result = $window[name] options.message, options.defaultText
+      result = $window[name] options.message, options.defaultText ? ''
       handler defer, result
       defer.promise
 
