@@ -76,9 +76,9 @@ angular.module('ng-extra', ['ngResource'])
   $provide.decorator('$resource', [
     '$delegate'
 
-  ($delegate) ->
+  ($resource) ->
     (url, paramDefaults, actions) ->
-      Resource = $delegate url, paramDefaults, actions
+      Resource = $resource url, paramDefaults, actions
       angular.forEach actions, (options, method) ->
         return unless options.normalize
         retainprops = options.retainprops ? ['id']
@@ -107,8 +107,7 @@ angular.module('ng-extra', ['ngResource'])
             error? resp
 
           @$resolved = false
-          result = Resource[method] params, data, successHandler, errorHandler
-          result.$promise or result
+          Resource[method](params, data, successHandler, errorHandler).$promise.then => this
 
       Resource
   ])
