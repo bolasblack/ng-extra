@@ -9,22 +9,6 @@ angular.module('ng-extra', ['ngResource'])
     angular.fromJson angular.toJson obj
 ) # ]]]
 
-.run([ # [[[ $scope.$watchOnce
-  '$rootScope'
-
-($rootScope) ->
-  $rootScope.$watchOnce = (watchExpression, listener, objectEquality) ->
-    deregistrater = $rootScope.$watch watchExpression, ->
-      deregistrater()
-      listener?.apply? this, arguments...
-    , objectEquality
-
-  $rootScope.$watchCollectionOnce = (watchExpression, listener) ->
-    deregistrater = $rootScope.$watchCollection watchExpression, ->
-      deregistrater()
-      listener?.apply? this, arguments...
-]) # ]]]
-
 .run([ # [[[ $scope.$safeDigest
   '$rootScope'
 
