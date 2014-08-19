@@ -53,7 +53,7 @@ angular.module('ng-extra', ['ngResource'])
 .config([ # Resource action normalize [[[
   '$provide'
   ($provide) ->
-    
+
     $provide.decorator('$resource', [
       '$delegate'
       ($resource) ->
@@ -94,6 +94,7 @@ angular.module('ng-extra', ['ngResource'])
 
 ]) # ]]]
 
+#
 # html:
 #   <button data-busybtn="click dblclick"
 #           data-busybtn-text="submiting..."
@@ -117,12 +118,35 @@ angular.module('ng-extra', ['ngResource'])
 #     # some code
 #
 .directive('busybtn', [ # [[[
-  '$q', '$parse'
-  ($q ,  $parse) ->
+  '$q', '$parse', '$sce'
+  ($q ,  $parse ,  $sce) ->
     link: (scope, element, attrs) ->
       isBusy = false
-      changeMethod = if element.is('input') then 'val' else 'text'
-      originalText = element[changeMethod]()
+
+      elem = do ->
+        changeMethod = if element.is('input') then 'val' else 'text'
+
+        set: (content) ->
+          if attrs.ngBind or attrs.ngBindTemplate
+            # https://github.com/angular/angular.js/blob/0a738ce1760f38efe45e79aa133442be09b56803/src/ng/directive/ngBind.js#L66
+            # https://github.com/angular/angular.js/blob/0a738ce1760f38efe45e79aa133442be09b56803/src/ng/directive/ngBind.js#L130
+            element.text content
+          else if attrs.ngBindHtml
+            # https://github.com/angular/angular.js/blob/0a738ce1760f38efe45e79aa133442be09b56803/src/ng/directive/ngBind.js#L198
+            element.html $sce.getTrustedHtml content
+          else
+            element[changeMethod] content
+
+        get: ->
+          bindContent = attrs.ngBind or attrs.ngBindHtml
+          if bindContent
+            scope.$eval bindContent
+          else if attrs.ngBindTemplate
+            attrs.ngBindTemplate
+          else
+            element[changeMethod]()
+
+      originalText = elem.get()
 
       handler = (event, params...) ->
         event.preventDefault()
@@ -154,8 +178,8 @@ angular.module('ng-extra', ['ngResource'])
           promise.finally ->
             isBusy = false
 
-      # Maybe your button content is dynamic?
-      scope.$watch (-> element[changeMethod]()), (newVal) ->
+      # Maybe your button has dynamic content?
+      scope.$watch elem.get, (newVal) ->
         return if newVal is attrs.busybtnText
         originalText = newVal
 
@@ -166,9 +190,9 @@ angular.module('ng-extra', ['ngResource'])
         element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
         element["#{if isBusy then 'a' else 'removeA'}ttr"] 'disabled', 'disabled'
         if isBusy and angular.isDefined attrs.busybtnText
-          element[changeMethod] attrs.busybtnText
+          element.text attrs.busybtnText
         else if originalText?
-          element[changeMethod] originalText
+          elem.set originalText
 ]) # ]]]
 
 # html:
@@ -262,4 +286,3 @@ angular.module('ng-extra', ['ngResource'])
     $dialog
 
 ]) # ]]]
-
