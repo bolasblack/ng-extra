@@ -5,7 +5,10 @@
   "authors": [
     "bolasblack <bolasblack@gmail.com>"
   ],
-  "main": "src/ng-extra.coffee",
+  "main": [
+    "src/index.coffee",
+    "src/resource.coffee"
+  ],
   "license": "MIT",
   "ignore": [
     "**/.*",
