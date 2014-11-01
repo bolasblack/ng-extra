@@ -2,6 +2,34 @@
 isPromise = (obj) ->
   obj? and angular.isFunction obj.then
 
+angular.module('ng')
+
+.config(['$provide', ($provide) ->
+  $provide.decorator('$q', [
+    '$delegate'
+    ($delegate) ->
+      STATUS = {
+        resolved: 1
+        rejected: 2
+      }
+
+      $delegate.isPromise = isPromise
+
+      angular.forEach 'Resolved Rejected'.split(' '), (method) ->
+        $delegate["is#{method}"] = (promise) ->
+          unless isPromise(promise)
+            method is 'Resolved'
+            return
+
+          if promise.$$state?
+            STATUS[method.toLowerCase()] is promise.$$state.status
+          else
+            $delegate["is#{method}"] $q.when promise
+
+      $delegate
+  ])
+])
+
 angular.module('ng-extra', [])
 
 .run(-> # angular.clean [[[
