@@ -135,7 +135,8 @@ angular.module('ng-extra', [])
       bindFn = if /Promise$/.test(attrs.busybtn) then bindPromise else bindEvents
       bindFn attrs.busybtn
 
-      scope.$watch (-> isBusy), ->
+      scope.$watch (-> isBusy), (newVal, oldVal) ->
+        return if newVal is oldVal
         element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
         element["#{if isBusy then 'a' else 'removeA'}ttr"] 'disabled', 'disabled'
         if isBusy and angular.isDefined attrs.busybtnText
@@ -197,7 +198,8 @@ angular.module('ng-extra', [])
       bindFn = if /Promise$/.test(attrs.busybox) then bindPromise else bindEvents
       bindFn attrs.busybox
 
-      scope.$watch (-> isBusy), ->
+      scope.$watch (-> isBusy), (newVal, oldVal) ->
+        return if newVal is oldVal
         element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
         element["#{if isBusy then 'a' else 'removeA'}ttr"] 'disabled', 'disabled'
         if isBusy and angular.isDefined attrs.busyboxText
