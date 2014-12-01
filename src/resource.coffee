@@ -74,7 +74,7 @@ angular.module('ng-extra.resource', ['ngResource'])
                 @$resolved = true
                 @$promise = promise
                 success? this, headers
-              errorHandler = (resp) ->
+              errorHandler = (resp) =>
                 @$resolved = true
                 error? resp
 
