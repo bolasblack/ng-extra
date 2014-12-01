@@ -53,12 +53,16 @@ angular.module('ng-extra.resource', ['ngResource'])
               if angular.isFunction params
                 error = data
                 success = params
-                params = {}
-                data = {}
+                params = null
+                data = null
               else if angular.isFunction data
                 error = success
                 success = data
-                data = {}
+                data = null
+
+              if params? and not data?
+                data = params
+                params = null
 
               data = angular.copy(data) or {}
               angular.forEach retainprops, (property) =>
