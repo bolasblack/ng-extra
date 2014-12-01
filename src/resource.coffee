@@ -46,6 +46,7 @@ angular.module('ng-extra.resource', ['ngResource'])
           Resource = $resource url, paramDefaults, actions
           angular.forEach actions, (options, method) ->
             return unless options.normalize
+            return unless method in ['POST', 'PUT', 'PATCH']
             retainprops = options.retainprops ? ['id']
 
             Resource::["$#{method}"] = (params, data, success, error) ->
