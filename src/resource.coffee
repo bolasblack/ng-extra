@@ -68,9 +68,11 @@ angular.module('ng-extra.resource', ['ngResource'])
               angular.forEach retainprops, (property) =>
                 data[property] = this[property]
 
-              successHandler = (resp, headers) =>
+              successHandler = (item, headers) =>
+                promise = @$promise
+                angular.copy angular.clean(item), this
                 @$resolved = true
-                angular.copy angular.clean(resp), this
+                @$promise = promise
                 success? this, headers
               errorHandler = (resp) ->
                 @$resolved = true
