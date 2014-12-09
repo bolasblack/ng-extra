@@ -1,7 +1,8 @@
 
 angular.module('ng-extra.resource', ['ngResource'])
 
-.config([ # Resource.wrapStaticMethod [[[
+# Resource.wrapStaticMethod and Resource.wrapInstanceMethod
+.config([
   '$provide'
   ($provide) ->
     $provide.decorator('$resource', [
@@ -10,15 +11,20 @@ angular.module('ng-extra.resource', ['ngResource'])
         (url, paramDefaults, actions) ->
           Resource = $delegate url, paramDefaults, actions
 
-          Resource.wrapStaticMethod = (fnName, fn, deleteInstanceMethod = true) ->
+          Resource.wrapStaticMethod = (fnName, wrapper, deleteInstanceMethod = true) ->
+            return unless angular.isFunction wrapper
             originalFn = Resource[fnName]
-            if deleteInstanceMethod
-              delete Resource::["$#{fnName}"]
-            Resource[fnName] = fn -> originalFn.apply Resource, arguments
+            delete Resource::["$#{fnName}"] if deleteInstanceMethod
+            Resource[fnName] = wrapper -> originalFn.apply Resource, arguments
+
+          Resource.wrapInstanceMethod = (fnName, wrapper) ->
+            return unless angular.isFunction wrapper
+            originalFn = Resource::["$#{fnName}"]
+            Resource::["$#{fnName}"] = wrapper originalFn
 
           Resource
   ])
-]) # ]]]
+])
 
 
 # Resource = $resource(
@@ -35,7 +41,7 @@ angular.module('ng-extra.resource', ['ngResource'])
 # resource = new Resource
 # resource.$update(params, data)
 #
-.config([ # Resource action normalize [[[
+.config([
   '$provide'
   ($provide) ->
 
@@ -84,4 +90,4 @@ angular.module('ng-extra.resource', ['ngResource'])
           Resource
     ])
 
-]) # ]]]
+])
