@@ -2,6 +2,16 @@
 isPromise = (obj) ->
   obj? and angular.isFunction obj.then
 
+angular.safeModule = (moduleName, deps) ->
+  try
+    module = angular.module moduleName
+    module.run(['$log', ($log) ->
+      $log.info "Module \"#{moduleName}\" defined second time, new dependencies:", deps
+    ])
+    module
+  catch
+    angular.module moduleName, deps
+
 angular.clean = (obj) ->
   angular.fromJson angular.toJson obj
 
