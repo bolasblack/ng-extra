@@ -2,8 +2,23 @@
 isPromise = (obj) ->
   obj? and angular.isFunction obj.then
 
+angular.clean = (obj) ->
+  angular.fromJson angular.toJson obj
+
 angular.module('ng')
 
+# add $safeDigest to $rootScope
+.config(['$provide', ($provide) ->
+  $provide.decorator('$rootScope', [
+    '$delegate'
+    ($delegate) ->
+      $delegate.$safeDigest = ->
+        @$digest() unless @$$phase
+      $delegate
+  ])
+])
+
+# add isPromise, isResolved, isRejected to $q
 .config(['$provide', ($provide) ->
   $provide.decorator('$q', [
     '$delegate'
@@ -32,18 +47,6 @@ angular.module('ng')
 
 angular.module('ng-extra', [])
 
-.run(-> # angular.clean [[[
-  angular.clean = (obj) ->
-    angular.fromJson angular.toJson obj
-) # ]]]
-
-.run([ # [[[ $scope.$safeDigest
-  '$rootScope'
-  ($rootScope) ->
-    $rootScope.$safeDigest = ->
-      @$digest() unless @$$phase
-]) # ]]]
-
 # html:
 #   <button data-busybtn="click dblclick"
 #           data-busybtn-text="submiting..."
@@ -66,7 +69,7 @@ angular.module('ng-extra', [])
 #     $scope.clickPromise = defer.promise # assign a promise
 #     # some code
 #
-.directive('busybtn', [ # [[[
+.directive('busybtn', [
   '$q', '$parse', '$sce'
   ($q ,  $parse ,  $sce) ->
     link: (scope, element, attrs) ->
@@ -143,7 +146,7 @@ angular.module('ng-extra', [])
           element.text attrs.busybtnText
         else if originalText?
           elem.set originalText
-]) # ]]]
+])
 
 # html:
 #   <input type="text"
@@ -172,7 +175,7 @@ angular.module('ng-extra', [])
 #     $scope.inputPromise = defer.promise # assign a promise
 #     # some code
 #
-.directive('busybox', [ # [[[
+.directive('busybox', [
   '$q', '$parse'
   ($q ,  $parse) ->
     terminal: true
@@ -206,13 +209,13 @@ angular.module('ng-extra', [])
           element.val attrs.busyboxText
         else if ngModel
           element.val ngModel.$modelValue
-]) # ]]]
+])
 
 # Wrap `window.alert`, `window.prompt`, `window.confirm`
 #
 # So make custom dialog component after a long time can be easier,
 # with override $dialog like this: http://jsfiddle.net/hr6X4/1/
-.factory('$dialog', [ # [[[
+.factory('$dialog', [
   '$window', '$q'
   ($window ,  $q) ->
     $dialog = {}
@@ -235,5 +238,4 @@ angular.module('ng-extra', [])
         defer.promise
 
     $dialog
-
-]) # ]]]
+])
