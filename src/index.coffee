@@ -3,11 +3,15 @@ isPromise = (obj) ->
   obj? and angular.isFunction obj.then
 
 angular.safeModule = (moduleName, deps) ->
+  depsIncludedBy = (array) ->
+    includedByArray = _.partial _.contains, array
+    _(deps).every includedByArray
+
   try
     module = angular.module moduleName
-    module.run(['$log', ($log) ->
-      $log.info "Module \"#{moduleName}\" defined second time, new dependencies:", deps
-    ])
+    unless depsIncludedBy module.requires
+      message = "Module '#{module.name}' defined several times, but dependencies not compatible:"
+      console.warn message, module.requires, ':', deps
     module
   catch
     angular.module moduleName, deps
