@@ -1,0 +1,26 @@
+{
+  "name": "ng-extra",
+  "version": "0.0.1",
+  "description": "Add some useful sugar for Angular.js.",
+  "main": "lib/index.js",
+  "scripts": {
+    "postinstall": "node_modules/.bin/coffee -o lib/ src/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bolasblack/ng-extra.git"
+  },
+  "keywords": [
+    "angular.js"
+  ],
+  "author": "c4605 <bolasblack@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bolasblack/ng-extra/issues"
+  },
+  "homepage": "https://github.com/bolasblack/ng-extra",
+  "dependencies": {
+    "coffee-script": "^1.9.1"
+  }
+}
