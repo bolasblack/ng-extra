@@ -112,6 +112,9 @@ angular.module('ng-extra', [])
           else
             element[changeMethod]()
 
+        getAttr: (attrName) ->
+          element.attr("data-#{attrName}") or element.attr(attrName)
+
       originalText = elem.get()
 
       handler = (event, params...) ->
@@ -144,20 +147,24 @@ angular.module('ng-extra', [])
           promise.finally ->
             isBusy = false
 
-      # Maybe your button has dynamic content?
-      scope.$watch elem.get, (newVal) ->
-        return if newVal is attrs.busybtnText
-        originalText = newVal
-
       bindFn = if /Promise$/.test(attrs.busybtn) then bindPromise else bindEvents
       bindFn attrs.busybtn
 
-      scope.$watch (-> isBusy), (newVal, oldVal) ->
-        return if newVal is oldVal
+      allBusybtnText = []
+      scope.$watch (-> elem.getAttr 'busybtn-text'), (busybtnText) ->
+        allBusybtnText.push busybtnText
+
+      # Maybe your button has dynamic content?
+      scope.$watch elem.get, (newVal) ->
+        return if newVal in allBusybtnText
+        originalText = newVal
+
+      scope.$watch (-> isBusy), ->
         element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
         element["#{if isBusy then 'a' else 'removeA'}ttr"] 'disabled', 'disabled'
-        if isBusy and angular.isDefined attrs.busybtnText
-          element.text attrs.busybtnText
+        newestText = allBusybtnText[allBusybtnText.length - 1]
+        if isBusy and angular.isDefined newestText
+          elem.set newestText
         else if originalText?
           elem.set originalText
 ])
@@ -216,11 +223,11 @@ angular.module('ng-extra', [])
       bindFn attrs.busybox
 
       scope.$watch (-> isBusy), (newVal, oldVal) ->
-        return if newVal is oldVal
         element["#{if isBusy then 'add' else 'remove'}Class"] 'disabled'
         element["#{if isBusy then 'a' else 'removeA'}ttr"] 'disabled', 'disabled'
-        if isBusy and angular.isDefined attrs.busyboxText
-          element.val attrs.busyboxText
+        newestText = element.attr('busybox-text') or element.attr('data-busybox-text')
+        if isBusy and angular.isDefined newestText
+          element.val newestText
         else if ngModel
           element.val ngModel.$modelValue
 ])
