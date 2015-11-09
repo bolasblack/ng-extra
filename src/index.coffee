@@ -17,7 +17,8 @@ angular.safeModule = (moduleName, deps) ->
     angular.module moduleName, deps
 
 angular.clean = (obj) ->
-  angular.fromJson angular.toJson obj
+  angular.fromJson JSON.stringify obj, (key, value) ->
+    if typeof key is 'string' and key.charAt(0) is '$' then undefined else value
 
 angular.module('ng')
 
