@@ -46,15 +46,19 @@ angular.module('ng')
       $delegate.isPromise = isPromise
 
       angular.forEach 'Resolved Rejected'.split(' '), (method) ->
-        $delegate["is#{method}"] = (promise) ->
+        methodName = "is#{method}"
+        $delegate[methodName] = (promise) ->
           unless isPromise(promise)
-            method is 'Resolved'
-            return
+            return methodName is 'isResolved'
 
-          if promise.$$state?
+          # Some promise library's method
+          if angular.isFunction promise[methodName]
+            promise[methodName]()
+          # Angular way
+          else if promise.$$state?
             STATUS[method.toLowerCase()] is promise.$$state.status
           else
-            $delegate["is#{method}"] $q.when promise
+            $delegate[methodName] $q.when promise
 
       $delegate
   ])
