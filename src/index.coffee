@@ -152,7 +152,8 @@ angular.module('ng-extra', [])
           promise.finally ->
             isBusy = false
 
-      bindFn = if /Promise$/.test(attrs.busybtn) then bindPromise else bindEvents
+      isWatchPromise = /Promise$/.test(attrs.busybtn) or scope.$eval(attrs.busybtnPromise)
+      bindFn = if isWatchPromise then bindPromise else bindEvents
       bindFn attrs.busybtn
 
       allBusybtnText = []
@@ -224,7 +225,8 @@ angular.module('ng-extra', [])
           $q.when(fn scope, $event: event, $params: params).finally ->
             isBusy = false
 
-      bindFn = if /Promise$/.test(attrs.busybox) then bindPromise else bindEvents
+      isWatchPromise = /Promise$/.test(attrs.busybox) or scope.$eval(attrs.busyboxPromise)
+      bindFn = if isWatchPromise then bindPromise else bindEvents
       bindFn attrs.busybox
 
       scope.$watch (-> isBusy), (newVal, oldVal) ->
