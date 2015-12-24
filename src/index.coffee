@@ -20,7 +20,7 @@ angular.clean = (obj) ->
   angular.fromJson JSON.stringify obj, (key, value) ->
     if typeof key is 'string' and key.charAt(0) is '$' then undefined else value
 
-angular.module('ng')
+angular.module('ng-extra', [])
 
 # add $safeDigest to $rootScope
 .config(['$provide', ($provide) ->
@@ -63,8 +63,6 @@ angular.module('ng')
       $delegate
   ])
 ])
-
-angular.module('ng-extra', [])
 
 # html:
 #   <button data-busybtn="click dblclick"
@@ -146,7 +144,7 @@ angular.module('ng-extra', [])
           $form.off submitEvents.join(' '), handler
 
       bindPromise = (promiseName) ->
-        scope.$watch promiseName, (promise) ->
+        scope.$watch (-> scope.$eval promiseName), (promise) ->
           return unless isPromise promise
           isBusy = true
           promise.finally ->
@@ -211,7 +209,7 @@ angular.module('ng-extra', [])
       isBusy = false
 
       bindPromise = (promiseName) ->
-        scope.$watch promiseName, (promise) ->
+        scope.$watch (-> scope.$eval promiseName), (promise) ->
           return unless isPromise promise
           isBusy = true
           promise.finally ->
